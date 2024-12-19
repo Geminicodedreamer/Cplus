@@ -1,42 +1,99 @@
+#include <bits/stdc++.h>
 
+using namespace std;
 
-// #include <bits/stdc++.h>
+const int N = 200010, M = N * 2;
 
-// using namespace std;
+struct Query
+{
+    int l, r;
+} q[N];
+int n, len;
+int h[N], e[M], ne[M], col[M], c[M], idx;
+int s1[N], s2[N], l[N], r[N];
 
-// const int N = 110;
-// double p[N], q[N];
-// double f[N][N], w[N][N];
-// int n;
+void add(int a, int b)
+{
+    e[idx] = b, ne[idx] = h[a], h[a] = idx++;
+}
 
-// double dp()
-// {
-//     for (int i = 1; i <= n + 1; i++)
-//         f[i][i - 1] = q[i - 1], w[i][i - 1] = q[i - 1];
-//     for (int len = 1; len <= n; len++)
-//         for (int i = 1; i + len - 1 <= n; i++)
-//         {
-//             int j = i + len - 1;
-//             f[i][j] = 1e8;
-//             w[i][j] = w[i][j - 1] + p[j] + q[j];
-//             for (int k = i; k <= j; k++)
-//             {
-//                 double t = f[i][k - 1] + f[k + 1][j] + w[i][j];
-//                 if (t < f[i][j])
-//                     f[i][j] = t;
-//             }
-//         }
-//     return f[1][n];
-// }
+int get_len(int x)
+{
+    return x / len;
+}
 
-// int main()
-// {
-//     cin >> n;
-//     for (int i = 1; i <= n; i++)
-//         cin >> p[i];
-//     for (int i = 0; i <= n; i++)
-//         cin >> q[i];
-//     printf("%.8lf\n", dp());
-//     system("pause");
-//     return 0;
-// }
+int cidx = 0;
+void dfs(int u)
+{
+    col[++cidx] = c[u];
+    l[u] = cidx;
+    for (int i = h[u]; ~i; i = ne[i])
+        dfs(e[i]);
+    r[u] = cidx;
+}
+
+int main()
+{
+    cin >> n;
+    len = sqrtl(n);
+    memset(h, -1, sizeof h);
+    for (int i = 1; i <= n; i++)
+    {
+        int father;
+        cin >> col[i] >> father;
+        if (i != 1)
+            add(father, i);
+    }
+    dfs(1);
+
+    for (int i = 1; i <= n; i++)
+    {
+        q[i - 1] = {l[i], r[i]};
+    }
+    sort(q, q + n, [&](const Query &a, const Query &b)
+         {
+        if(get_len(a.l) != get_len(b.l))
+            return a.l < b.l;
+        return a.r < b.r; });
+
+    int ans = 0, cnt = 0;
+    for (int i = 0, ll = 0, rr = 0; i < n; i++)
+    {
+        while (ll > q[i].l)
+        {
+            ll--;
+            s2[s1[col[ll]]] && s2[s1[col[ll]]]--;
+            s1[col[ll]]++;
+            s2[s1[col[ll]]]++;
+            s1[col[ll]] == 1 && cnt++;
+        }
+        while (rr < q[i].r)
+        {
+            rr++;
+            s2[s1[col[rr]]] && s2[s1[col[rr]]]--;
+            s1[col[rr]]++;
+            s2[s1[col[rr]]]++;
+            s1[col[rr]] == 1 && cnt++;
+        }
+        while (ll < q[i].l)
+        {
+            s2[s1[col[ll]]] && s2[s1[col[ll]]]--;
+            s1[col[ll]]--;
+            s2[s1[col[ll]]]++;
+            s1[col[ll]] || cnt--;
+            ll++;
+        }
+        while (rr > q[i].r)
+        {
+            s2[s1[col[rr]]] && s2[s1[col[rr]]]--;
+            s1[col[rr]]--;
+            s2[s1[col[rr]]]++;
+            s1[col[rr]] || cnt--;
+            rr--;
+        }
+        int length = rr - ll + 1;
+        length % cnt == 0 && s2[length / cnt] == cnt &&ans++;
+    }
+    cout << ans;
+    return 0;
+}
